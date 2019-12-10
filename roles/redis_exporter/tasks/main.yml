@@ -1,0 +1,31 @@
+---
+- name: download Git and Wget
+  apt:
+    pkg: 
+    - git
+    - wget
+    update_cache: yes
+- name: Download Go installer
+  get_url:
+    url: https://storage.googleapis.com/golang/getgo/installer_linux
+    dest: /tmp/
+    mode: 0755
+- name: run Go installer
+  command: /tmp/installer_linux
+
+- name: Get redis_exporter source code
+  shell: . {{ ansible_env.HOME }}/.bash_profile && go get github.com/oliver006/redis_exporter
+
+- name: Build redis_exporter source code
+  shell: . {{ ansible_env.HOME }}/.bash_profile && go build
+  args:
+    chdir: /root/go/src/github.com/oliver006/redis_exporter
+- name: Create Systemd Unit for redis_exporter
+  template: 
+    src: redis_exporter.service.j2
+    dest: /etc/systemd/system/redis_exporter.service
+    mode: 0755
+- name: Start redis_exporter unit
+  systemd:
+    state: started
+    name: redis_exporter

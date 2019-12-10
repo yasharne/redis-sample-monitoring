@@ -1,0 +1,88 @@
+--- 
+- name: Installing granafa dependecies
+  apt: 
+    name: software-properties-common
+    state: present
+    update_cache: yes
+- name: Adding grafana repository
+  lineinfile:
+    path: /etc/apt/sources.list
+    line: deb https://packages.grafana.com/oss/deb stable main
+- name: Adding grafana repository key
+  apt_key:
+    url: https://packages.grafana.com/gpg.key
+    state: present
+- name: Installing grafana
+  apt:
+    name: grafana
+    update_cache: yes
+- name: Start grafana systemd unit
+  systemd:
+    state: started
+    enabled: yes
+    name: grafana-server
+- name: make sure grafana is listening to the port 3000
+  wait_for:
+    port: 3000
+    timeout: 10
+- name: Creating the prometheus datasource
+  grafana_datasource:
+    grafana_url: "http://127.0.0.1:3000"
+    name: "prom"
+    ds_type: "prometheus"    
+    url: "http://{{prometheus_ip}}:9090"
+    use_proxy: yes
+    basic_auth_password: "admin"
+    basic_auth_user: "admin"
+
+  # uri:
+  #   url: http://127.0.0.1:3000/api/datasources
+  #   user: admin
+  #   password: admin
+  #   force_basic_auth: yes
+  #   method: POST
+  #   body_format: json
+  #   body: > 
+  #     {
+  #     "name": "prom",
+  #     "type": "prometheus",
+  #     "url": "http://{{prometheus_ip}}:9090",
+  #     "isDefault": true,
+  #     "access": "proxy"
+  #     }
+  #   headers:
+  #     Content-Type: application/json;charset=UTF-8
+  # retries: 2
+
+# - name: Importing the Redis dashboard
+#   uri:
+#     url: "http://127.0.0.1:3000/api/dashboards/db"
+#     user: "admin"
+#     password: "admin"
+#     force_basic_auth: true
+#     method: POST
+#     body_format: json
+#     body: >
+#       {
+#         "dashboard": {{ lookup("file", 'files/grafana.json') }},
+#         "overwrite": true,
+#         "message": "Updated by ansible"
+#       }
+#     headers:
+#       Content-Type: "application/json"
+- name: Copy dashboard to the host
+  copy:
+    src: grafana.json
+    dest: /tmp
+    owner: root
+    group: grafana
+    mode: '0640'
+- name: Importing the Redis dashboard
+  grafana_dashboard:
+    grafana_url: "http://127.0.0.1:3000"
+    grafana_user: "admin"
+    grafana_password: "admin"
+    state: present
+    message: "Initial import"
+    overwrite: "yes"
+    path: '/tmp/grafana.json'

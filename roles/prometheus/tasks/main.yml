@@ -1,0 +1,21 @@
+- name: Install prometheus from repositories
+  apt:
+    pkg:
+    - prometheus
+    - prometheus-node-exporter
+    - prometheus-pushgateway
+    - prometheus-alertmanager
+- name: start prometheus systemd unit
+  systemd:
+    name: prometheus
+    state: started
+    enabled: yes
+- name: Generate configuration file to monitor redis
+  template: 
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - restart prometheus

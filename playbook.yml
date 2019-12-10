@@ -1,0 +1,29 @@
+---
+- hosts: redis
+  become: yes
+  vars:
+    sentinel_quorum: 2
+    sentinel_down_after_milliseconds: 30000
+  roles:
+    - role: redis
+
+- hosts: redis_exporter
+  become: yes
+  roles: 
+    - role: redis_exporter
+
+- hosts: prometheus
+  become: yes
+  vars:
+    servers_to_monitor: "{{ groups['redis'] }}"
+  roles:
+    - role: prometheus
+
+- hosts: grafana
+  become: yes
+  # vars:
+  #     grafana_security:
+  #       admin_user: admin
+  #       admin_password: admin
+  roles:
+    - role: grafana

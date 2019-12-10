@@ -1,0 +1,29 @@
+---
+- name: install redis-server from the package manager
+  apt:
+    name: redis-server
+    update_cache: yes
+- name: Generate redis.conf file
+  template:
+    src: redis.conf.j2
+    dest: /etc/redis/redis.conf
+    owner: redis
+    mode: 0755
+  notify:
+    - restart redis
+- name: generate Redis sentinel configuration
+  template:
+    src: sentinel.conf.j2
+    dest: /etc/redis/sentinel.conf
+    owner: redis
+    mode: 0755
+- name: Create Systemd unit for redis sentinel
+  copy:
+    src: sentinel.service
+    dest: /etc/systemd/system/sentinel.service
+    mode: 0777
+- name: Start Sentinel systemd unit
+  systemd:
+    name: sentinel
+    state: started
+    enabled: yes

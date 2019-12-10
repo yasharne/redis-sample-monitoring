@@ -1,0 +1,12 @@
+[Unit]
+Description=Redis Exporter
+After=network.target
+
+[Service]
+LimitNOFILE=64000
+User={{ ansible_env.USER }}
+Group={{ ansible_env.USER }}
+ExecStart=/root/go/src/github.com/oliver006/redis_exporter/redis_exporter
+
+[Install]
+WantedBy=multi-user.target
