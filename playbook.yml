@@ -21,9 +21,5 @@
 
 - hosts: grafana
   become: yes
-  # vars:
-  #     grafana_security:
-  #       admin_user: admin
-  #       admin_password: admin
   roles:
     - role: grafana
