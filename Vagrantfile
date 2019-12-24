@@ -13,7 +13,6 @@ Vagrant.configure("2") do |config|
     v.memory = 512
   end
   config.vm.synced_folder ".", "/vagrant"
-  config.vm.box_check_update = false
   
   config.vm.define "redis1" do |redis1|
     redis1.vm.box = "hashicorp/bionic64"
