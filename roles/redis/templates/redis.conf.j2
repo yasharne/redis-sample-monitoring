@@ -279,7 +279,7 @@ dir /var/lib/redis
 #    and resynchronize with them.
 #
 # slaveof <masterip> <masterport>
-{% if hostvars[inventory_hostname].ansible_all_ipv4_addresses[1] != redis1_ip %}
+{% if hostvars[inventory_hostname].ansible_eth1.ipv4.address != redis1_ip %}
 slaveof {{redis1_ip}} {{redis_port}}
 {% endif %}
 
